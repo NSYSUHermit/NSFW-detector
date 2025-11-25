@@ -1,38 +1,361 @@
+:root {
+  /* Color Palette: Gray-White & Sky Blue */
+  --background-color: #F0F2F5; /* Very light gray */
+  --panel-color-1: #FFFFFF;   /* Pure White for the primary panel */
+  --panel-color-2: #F8F9FA;   /* A very light, distinct gray for the secondary panel */
+  --panel-color-3: #E9ECEF;   /* A medium gray for the tertiary panel, creating clear separation */
+  --border-color: #DEE2E6;    /* A more defined border color */
+  --text-primary: #333333;    /* Dark gray for main text */
+  --text-secondary: #666666;  /* Medium gray for secondary text */
+  --accent-color: #007AFF;    /* Apple's Sky Blue */
+  --accent-hover: #005ECB;    /* Darker blue for hover */
+  --danger-color: #FF3B30;    /* Apple's Red */
+  --input-bg: #FFFFFF;        /* Pure white for inputs to ensure contrast on all panel colors */
+
+  /* Shadows for depth and elegance */
+  --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08); /* Enhanced default shadow */
+  --shadow-medium: 0 4px 15px rgba(0, 0, 0, 0.1);
+  --shadow-accent: 0 4px 20px rgba(0, 122, 255, 0.2);
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased; /* Smoother fonts */
+  -moz-osx-font-smoothing: grayscale; /* Smoother fonts */
+  background-color: var(--background-color);
+  color: var(--text-primary);
+  /* A clean background is more high-end */
+}
+
 .App {
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
+.App-header {
+  background-color: var(--panel-color-1);
+  /* Subtle blur for header, less pronounced on light theme */
+  backdrop-filter: blur(5px);
+  padding: 20px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 30px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: var(--shadow-light); /* Add subtle shadow */
+}
+
+.App-header h1 {
+  margin: 0;
+  font-size: 2em;
+  letter-spacing: 1px;
+  color: var(--text-primary);
+}
+
+.status-display {
+  margin-top: 10px;
+  font-size: 1.2em;
+  color: var(--text-secondary);
+  transition: color 0.3s ease; /* Smooth color transition */
+}
+
+.status-display span {
+  font-weight: bold;
+  color: var(--text-primary);
+  display: inline-block;
+  min-width: 60px; /* Give more space for dynamic content */
+  text-align: left;
+  animation: pulse 2s infinite alternate; /* Smoother pulse */
+  text-shadow: 0 0 5px rgba(0, 122, 255, 0.3); /* Subtle glow for distance */
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); color: var(--accent-color); } /* Pulse with accent color */
+  100% { transform: scale(1); }
+}
+
+.main-content {
+  max-width: 1500px; /* Even wider layout for a more spacious feel */
+  margin: auto;
+  padding: 20px;
+  display: flex; /* Use flex for main content to center panels if needed */
+  justify-content: center;
+}
+
+.panels-container {
+  display: flex;
+  gap: 40px; /* Further increased gap for clear separation */
+  align-items: flex-start;
+  width: 100%; /* Ensure container takes full width */
+}
+
+.panel {
+  background-color: var(--panel-color-1); /* Default panel color */
+  backdrop-filter: blur(8px); /* Slightly less blur for light theme */
+  padding: 35px; /* Increased padding for more internal whitespace */
+  border-radius: 12px;
+  margin-bottom: 30px;
+  border: 1px solid var(--border-color);
+  flex: 1;
+  box-shadow: var(--shadow-light); /* Subtle shadow for depth */
+  transition: all 0.3s ease; /* Smooth transitions for all properties */
+}
+
+/* Differentiate panels with different background colors */
+.panel:nth-child(1) { background-color: var(--panel-color-1); }
+.panel:nth-child(2) { background-color: var(--panel-color-2); }
+.panel:nth-child(3) { background-color: var(--panel-color-3); }
+
+.panel:hover {
+  border-color: var(--accent-color);
+  box-shadow: var(--shadow-accent); /* More pronounced shadow on hover */
+  transform: translateY(-3px); /* Subtle lift effect */
+}
+
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+  position: relative;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.95em;
+  letter-spacing: 0.5px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  font-size: 1em;
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  transition: all 0.2s ease; /* Smooth transitions */
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); /* Inner shadow for depth */
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.3); /* Focus ring effect */
+}
+
+/* Style for the new select dropdown */
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  font-size: 1em;
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+  -webkit-appearance: none; /* Remove default arrow on Safari/Chrome */
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23666666%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+  background-repeat: no-repeat;
+  background-position: right 15px top 50%;
+  background-size: .65em auto;
+}
+
+.form-group select:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.3);
+}
+
+/* Style for the new select dropdown */
+.form-group .select-wrapper {
+  position: relative;
+}
+
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  font-size: 1em;
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+  -webkit-appearance: none; /* Remove default arrow on Safari/Chrome */
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.form-group .select-wrapper::after {
+  content: '▾';
+  font-size: 1.5em;
+  color: var(--text-secondary);
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
   pointer-events: none;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.form-group select:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.3);
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+button {
+  width: 100%;
+  padding: 12px 15px;
+  cursor: pointer;
+  border-radius: 8px;
+  border: none;
+  font-size: 1.1em;
+  font-weight: 600;
+  transition: all 0.2s ease; /* Smooth transitions */
+  box-shadow: var(--shadow-light); /* Subtle shadow for buttons */
+  letter-spacing: 0.5px;
+}
+
+button.primary {
+  background-color: var(--accent-color);
+  color: var(--text-primary);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* Text shadow for pop */
+}
+
+button.primary:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-accent); /* Accent shadow on hover */
+}
+
+button.secondary {
+  background-color: var(--panel-color-1); /* Consistent white background */
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-light);
+}
+
+button:hover {
+  transform: translateY(-1px); /* Subtle lift */
+  box-shadow: var(--shadow-medium); /* More pronounced shadow */
+}
+
+button.remove-btn {
+  background-color: var(--background-color); /* Match page background for a "cut-out" feel */
+  color: var(--text-secondary);
+  width: auto;
+  padding: 5px 15px;
+  font-size: 0.9em;
+  border: 1px solid var(--border-color);
+  box-shadow: none; /* No shadow for small buttons */
+}
+
+button.remove-btn:hover {
+  background-color: var(--danger-color);
+  color: var(--text-primary);
+  border-color: var(--danger-color);
+  transform: translateY(-1px);
+}
+
+h2 {
+  margin-top: 0;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  text-align: left;
+  color: var(--text-primary);
+  font-size: 2em; /* Even larger titles to anchor each panel */
+  font-weight: 700; /* Bolder font for stronger visual hierarchy */
+  letter-spacing: 0.8px;
+}
+
+.hardware-controls {
   display: flex;
   flex-direction: column;
+  gap: 15px;
+  margin-top: 20px; /* Add some space */
+}
+
+.scheme-list {
+  list-style: none;
+  padding: 0;
+  text-align: left;
+  max-height: 320px; /* Slightly taller list area */
+  overflow-y: auto; /* Enable vertical scrolling */
+  padding-right: 5px; /* Space for scrollbar */
+}
+
+/* Custom scrollbar for a cleaner look */
+.scheme-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scheme-list::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+.scheme-list::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 10px;
+}
+
+.scheme-list::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+.scheme-item {
+  background-color: var(--panel-color-1); /* Consistent white background for items */
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+  animation: fadeIn 0.5s ease;
+  box-shadow: var(--shadow-light); /* Subtle shadow for list items */
 }
 
-.App-link {
-  color: #61dafb;
+.scheme-item:hover {
+  background-color: var(--panel-color-1);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.1); /* Subtle blue glow */
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.scheme-details {
+  font-size: 0.9em;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.scheme-details strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.scheme-details span {
+  color: var(--text-secondary);
+}
+
+.scheme-list p {
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
 }
