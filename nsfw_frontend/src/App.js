@@ -14,6 +14,15 @@ function App() {
     danger_threshold: 50,
   });
 
+  // New state to hold the currently active (saved) configuration
+  const [activeConfig, setActiveConfig] = useState({
+    safe: { volume: 80, brightness: 16 },
+    warning: { volume: 40, brightness: 8 },
+    danger: { volume: 0, brightness: 0, target_app: 'Microsoft Excel' },
+    warning_threshold: 100,
+    danger_threshold: 50,
+  });
+
   const [currentDistance, setCurrentDistance] = useState('N/A');
   const [appList, setAppList] = useState([]);
 
@@ -22,7 +31,10 @@ function App() {
     // Fetch initial settings from backend
     fetch(`${API_URL}/settings/`)
       .then(res => res.json())
-      .then(data => setSettings(prev => ({ ...prev, ...data }))) // Merge with defaults
+      .then(data => {
+        setSettings(prev => ({ ...prev, ...data })); // Set the form state
+        setActiveConfig(prev => ({ ...prev, ...data })); // Also set the active config state
+      })
       .catch(err => console.error("Failed to fetch settings:", err));
 
     // Fetch application list
@@ -67,7 +79,10 @@ function App() {
       body: JSON.stringify(settings)
     })
     .then(res => res.json())
-    .then(data => console.log('Backend updated with scheme:', data))
+    .then(data => {
+      console.log('Backend updated with settings:', data);
+      setActiveConfig(data); // On successful save, update the active config to match the form
+    })
     .catch(err => console.error("Failed to update backend:", err));
   };
 
@@ -81,9 +96,19 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>StealthGuard</h1>
+        <img 
+          src="https://brandguide.asu.edu/profiles/contrib/webspark/modules/asu_brand/node_modules/@asu/component-header-footer/dist/assets/img/arizona-state-university-logo.png" 
+          alt="Arizona State University Logo" 
+          className="asu-logo"
+        />
         <div className="status-display">
           Current Distance: <span>{currentDistance} cm</span>
+        </div>
+        <div className="config-status-bar">
+          <strong>Active Config ➔</strong> 
+          <span>✅ Safe: &gt; {activeConfig.warning_threshold}cm (Vol: {activeConfig.safe.volume}, Bright: {activeConfig.safe.brightness})</span>
+          <span>⚠️ Warning: &lt; {activeConfig.warning_threshold}cm (Vol: {activeConfig.warning.volume}, Bright: {activeConfig.warning.brightness})</span>
+          <span>🚨 Danger: &lt; {activeConfig.danger_threshold}cm (Vol: {activeConfig.danger.volume}, Bright: {activeConfig.danger.brightness}, App: {activeConfig.danger.target_app})</span>
         </div>
       </header>
       <main className="main-content">
