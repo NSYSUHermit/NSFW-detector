@@ -5,31 +5,31 @@ import './App.css';
 const API_URL = 'http://127.0.0.1:8000/api';
 
 function App() {
-  // State for the list of schemes
-  const [schemes, setSchemes] = useState([]);
-  
-  // State for the "Add New Scheme" form
-  const [newScheme, setNewScheme] = useState({
-    distance_threshold: 50,
-    target_volume: 0,
-    brightness_steps: 15,
-    target_app: 'Microsoft Excel',
+  // A single state object for all settings
+  const [settings, setSettings] = useState({
+    safe: { volume: 80, brightness: 16 },
+    warning: { volume: 40, brightness: 8 },
+    danger: { volume: 0, brightness: 0, target_app: 'Microsoft Excel' },
+    warning_threshold: 100,
+    danger_threshold: 50,
   });
 
   const [currentDistance, setCurrentDistance] = useState('N/A');
-  const [appList, setAppList] = useState([]); // 新增 state 來儲存應用程式列表
+  const [appList, setAppList] = useState([]);
 
   // On component mount, fetch status periodically
   useEffect(() => {
-    // 獲取應用程式列表
+    // Fetch initial settings from backend
+    fetch(`${API_URL}/settings/`)
+      .then(res => res.json())
+      .then(data => setSettings(prev => ({ ...prev, ...data }))) // Merge with defaults
+      .catch(err => console.error("Failed to fetch settings:", err));
+
+    // Fetch application list
     fetch(`${API_URL}/applications/`)
       .then(res => res.json())
       .then(data => {
         setAppList(data);
-        // 將預設選擇的 app 設為列表中的第一個
-        if (data.length > 0) {
-          setNewScheme(prev => ({ ...prev, target_app: data[0] }));
-        }
       })
       .catch(err => console.error("Failed to fetch app list:", err));
 
@@ -45,49 +45,26 @@ function App() {
   }, []);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewScheme(prev => ({ ...prev, [name]: value }));
-  };
+    const { name, value, dataset } = e.target;
+    const { state } = dataset; // e.g., "safe", "warning", "danger"
 
-  const addScheme = (e) => {
-    e.preventDefault();
-    // Add the new scheme with a unique ID (timestamp)
-    const schemeToAdd = { ...newScheme, id: Date.now() };
-    const updatedSchemes = [...schemes, schemeToAdd];
-    setSchemes(updatedSchemes);
-    
-    // Find the most sensitive scheme (lowest distance) to send to the backend
-    const mostSensitiveScheme = updatedSchemes.reduce((min, s) => 
-      s.distance_threshold < min.distance_threshold ? s : min, updatedSchemes[0]
-    );
-
-    // Update the backend with the most sensitive scheme
-    if (mostSensitiveScheme) {
-      updateBackend(mostSensitiveScheme);
-    }
-  };
-
-  const removeScheme = (idToRemove) => {
-    const updatedSchemes = schemes.filter(s => s.id !== idToRemove);
-    setSchemes(updatedSchemes);
-
-    // If there are any schemes left, find the new most sensitive one and update backend
-    if (updatedSchemes.length > 0) {
-      const mostSensitiveScheme = updatedSchemes.reduce((min, s) => 
-        s.distance_threshold < min.distance_threshold ? s : min, updatedSchemes[0]
-      );
-      updateBackend(mostSensitiveScheme);
+    if (state) {
+      // It's a state-specific setting (volume, brightness, etc.)
+      setSettings(prev => ({
+        ...prev,
+        [state]: { ...prev[state], [name]: value }
+      }));
     } else {
-      // Optional: if all schemes are removed, you might want to send a default "safe" state
-      // For now, we do nothing, the backend keeps its last setting.
+      // It's a global setting (thresholds)
+      setSettings(prev => ({ ...prev, [name]: value }));
     }
   };
 
-  const updateBackend = (scheme) => {
+  const saveSettings = () => {
     fetch(`${API_URL}/settings/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(scheme)
+      body: JSON.stringify(settings)
     })
     .then(res => res.json())
     .then(data => console.log('Backend updated with scheme:', data))
@@ -111,57 +88,60 @@ function App() {
       </header>
       <main className="main-content">
         <div className="panels-container">
+          {/* Safe State Panel */}
           <div className="panel">
-            <h2>Add New Scheme</h2>
-            <form onSubmit={addScheme}>
-              <div className="form-group">
-                <label>Trigger Distance (cm):</label>
-                <input type="number" name="distance_threshold" value={newScheme.distance_threshold} onChange={handleInputChange} required />
-              </div>
-              <div className="form-group">
-                <label>Target Volume (0-100):</label>
-                <input type="number" name="target_volume" value={newScheme.target_volume} onChange={handleInputChange} required />
-              </div>
-              <div className="form-group">
-                <label>Brightness Reduction Steps:</label>
-                <input type="number" name="brightness_steps" value={newScheme.brightness_steps} onChange={handleInputChange} required />
-              </div>
-              <div className="form-group">
-                <label>Switch to Application:</label>
-                <div className="select-wrapper">
-                  <select name="target_app" value={newScheme.target_app} onChange={handleInputChange} required>
-                    {appList.length === 0 ? (
-                      <option disabled>Loading apps...</option>
-                    ) : (
-                      appList.map(app => <option key={app} value={app}>{app}</option>)
-                    )}
-                  </select>
-                </div>
-              </div>
-              <button type="submit" className="primary">Add Scheme</button>
-            </form>
+            <h2>✅ Safe State</h2>
+            <div className="form-group">
+              <label>Volume (0-100):</label>
+              <input type="number" name="volume" data-state="safe" value={settings.safe.volume} onChange={handleInputChange} />
+            </div>
+            <div className="form-group">
+              <label>Brightness (0-16):</label>
+              <input type="number" name="brightness" data-state="safe" value={settings.safe.brightness} onChange={handleInputChange} />
+            </div>
           </div>
 
+          {/* Warning State Panel */}
           <div className="panel">
-            <h2>Active Schemes</h2>
-            <ul className="scheme-list">
-              {schemes.length > 0 ? schemes.map(s => (
-                <li key={s.id} className="scheme-item">
-                  <div className="scheme-details">
-                    <strong>IF</strong> distance &lt; <strong>{s.distance_threshold} cm</strong>, <br/>
-                    <span>THEN switch to <strong>{s.target_app}</strong> (Volume: {s.target_volume}, Brightness: {s.brightness_steps} steps)</span>
-                  </div>
-                  <button onClick={() => removeScheme(s.id)} className="remove-btn">Remove</button>
-                </li>
-              )) : (
-                <p>
-                  No schemes configured. <br/>
-                  Add one to get started!
-                </p>
-              )}
-            </ul>
+            <h2>⚠️ Warning State</h2>
+            <div className="form-group">
+              <label>Trigger if distance &lt; (cm):</label>
+              <input type="number" name="warning_threshold" value={settings.warning_threshold} onChange={handleInputChange} />
+            </div>
+            <div className="form-group">
+              <label>Volume (0-100):</label>
+              <input type="number" name="volume" data-state="warning" value={settings.warning.volume} onChange={handleInputChange} />
+            </div>
+            <div className="form-group">
+              <label>Brightness (0-16):</label>
+              <input type="number" name="brightness" data-state="warning" value={settings.warning.brightness} onChange={handleInputChange} />
+            </div>
           </div>
 
+          {/* Danger State Panel */}
+          <div className="panel">
+            <h2>🚨 Danger State</h2>
+            <div className="form-group">
+              <label>Trigger if distance &lt; (cm):</label>
+              <input type="number" name="danger_threshold" value={settings.danger_threshold} onChange={handleInputChange} />
+            </div>
+            <div className="form-group">
+              <label>Volume (0-100):</label>
+              <input type="number" name="volume" data-state="danger" value={settings.danger.volume} onChange={handleInputChange} />
+            </div>
+            <div className="form-group">
+              <label>Brightness (0-16):</label>
+              <input type="number" name="brightness" data-state="danger" value={settings.danger.brightness} onChange={handleInputChange} />
+            </div>
+            <div className="form-group">
+              <label>Switch to Application:</label>
+              <select name="target_app" data-state="danger" value={settings.danger.target_app} onChange={handleInputChange}>
+                {appList.map(app => <option key={app} value={app}>{app}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* Hardware Control Panel */}
           <div className="panel">
             <h2>Hardware Control</h2>
             <div className="hardware-controls">
@@ -169,6 +149,9 @@ function App() {
               <button onClick={() => toggleHardware('buzzer')} className="secondary">Toggle Buzzer</button>
             </div>
           </div>
+        </div>
+        <div className="save-button-container">
+          <button onClick={saveSettings} className="primary">Save All Settings</button>
         </div>
       </main>
     </div>

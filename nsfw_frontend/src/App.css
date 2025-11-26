@@ -359,3 +359,8 @@ h2 {
   padding: 20px;
   font-style: italic;
 }
+
+.save-button-container {
+  max-width: 500px;
+  margin: 20px auto;
+}

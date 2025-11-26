@@ -95,7 +95,7 @@ static uint16_t measure_cm_blocking(uint16_t timeout_us){
   }
 
   if(!echo_done) return 0; 
-  uint16_t width_us = (uint16_t)(echo_end - echo_start)
+  uint16_t width_us = (uint16_t)(echo_end - echo_start);
   if(width_us < 100) {
     return 0;
   }
