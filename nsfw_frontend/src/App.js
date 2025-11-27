@@ -93,6 +93,22 @@ function App() {
       .catch(err => console.error(`Failed to toggle ${device}:`, err));
   };
 
+  const getCurrentStatus = () => {
+    if (currentDistance === 'N/A' || activeConfig.warning_threshold === undefined) {
+      return { name: 'STANDBY', color: 'var(--text-secondary)' };
+    }
+    const dist = Number(currentDistance);
+    if (dist <= Number(activeConfig.danger_threshold)) {
+      return { name: 'DANGER', color: 'var(--danger-color)' };
+    }
+    if (dist <= Number(activeConfig.warning_threshold)) {
+      return { name: 'WARNING', color: 'var(--asu-gold)' };
+    }
+    return { name: 'SAFE', color: '#28a745' }; // A nice green color
+  };
+
+  const status = getCurrentStatus();
+
   return (
     <div className="App">
       <header className="App-header">
@@ -101,9 +117,6 @@ function App() {
           alt="Arizona State University Logo" 
           className="asu-logo"
         />
-        <div className="status-display">
-          Current Distance: <span>{currentDistance} cm</span>
-        </div>
         <div className="config-status-bar">
           <strong>Active Config ➔</strong> 
           <span>✅ Safe: &gt; {activeConfig.warning_threshold}cm (Vol: {activeConfig.safe.volume}, Bright: {activeConfig.safe.brightness})</span>
@@ -112,6 +125,15 @@ function App() {
         </div>
       </header>
       <main className="main-content">
+        {/* New Main Status Display */}
+        <div className="main-status-display" style={{ color: status.color }}>
+          <div className="distance-label">Current Distance</div>
+          <div className="distance-value">
+            {currentDistance}<span>cm</span>
+          </div>
+          <div className="status-name">{status.name}</div>
+        </div>
+
         <div className="panels-container">
           {/* Safe State Panel */}
           <div className="panel">
