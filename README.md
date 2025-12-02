@@ -4,14 +4,14 @@
   <img src="https://brandguide.asu.edu/assets/img/asu-logos/asu_logo_maroon_rgb.png" alt="Arizona State University Logo" width="200"/>
 </p>
 
-An advanced, highly configurable privacy shield for your workspace. Using two ultrasonic sensors, this system detects proximity and automatically adjusts your Mac's state—including volume, screen brightness, and the active application—based on rules you define in a sleek, ASU-themed web interface.
+A fully-featured, bidirectional privacy shield for your workspace. Using two ultrasonic sensors, this system detects proximity and automatically adjusts your Mac's state (volume, brightness, active application). Its key feature is end-to-end synchronization, allowing real-time configuration of both software and hardware behavior directly from a sleek, ASU-themed web interface.
 
 ## Features
 
 *   **Dual Sensor Detection**: Utilizes two HC-SR04 ultrasonic sensors for wider and more reliable proximity detection.
 *   **Three-Stage Alert System**: Configure distinct actions for "Safe," "Warning," and "Danger" zones.
-*   **Real-time Remote Configuration**: A web-based UI allows you to dynamically adjust distance thresholds, volume, brightness, and the target "panic" application.
-*   **Live Hardware Sync**: Settings saved in the web UI are instantly sent to the microcontroller, updating its alert behavior in real-time.
+*   **Live Hardware Sync & Bidirectional Control**: Settings from the UI (like distance thresholds) are sent to the hardware in real-time. Conversely, physical interactions with the hardware (like a button press) are synced back to the UI, ensuring state consistency.
+*   **Independent Component Control**: The web UI allows for toggling LED and Buzzer alerts independently, offering granular control over the hardware's feedback.
 *   **Advanced Stability Control**: Implements a sliding window filter on both the hardware and backend to prevent false triggers from erratic readings.
 *   **ASU-Themed Interface**: A polished and professional user interface featuring the official Arizona State University logo and color palette.
 

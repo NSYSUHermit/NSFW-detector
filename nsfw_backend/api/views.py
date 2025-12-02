@@ -13,6 +13,8 @@ DEFAULT_SETTINGS = {
     "danger": {"volume": 0, "brightness": 0, "target_app": "Microsoft Excel"},
     "warning_threshold": 100,
     "danger_threshold": 50,
+    "led_alerts_enabled": True,    # New default state for LED alerts
+    "buzzer_alerts_enabled": True, # New default state for Buzzer alerts
 }
 
 class SettingsView(APIView):
@@ -37,16 +39,16 @@ class HardwareControlView(APIView):
     控制硬體 (LED/Buzzer)
     """
     def post(self, request, device, format=None):
-        # This function is now decoupled and might need a different implementation
-        # For now, we can try to send a command via a different mechanism if needed
-        cmd = ""
-        if device == 'led': cmd = "LED_TOGGLE\n"
-        elif device == 'buzzer': cmd = "BUZZ_TOGGLE\n"
-        else: return Response({"error": "Invalid device"}, status=status.HTTP_404_NOT_FOUND)
+        command = None
+        if device == 'led':
+            command = 'TOGGLE_LED'
+        elif device == 'buzzer':
+            command = 'TOGGLE_BUZZER'
         
-        # Note: This won't work as `serial_port_object` is in another process.
-        # A more advanced implementation would use Redis Pub/Sub for this.
-        return Response({"status": "Hardware control needs rework for new architecture."})
+        if command:
+            cache.client.get_client().publish('hardware-commands', command)
+            print(f"Published {command} command via Redis Pub/Sub.")
+        return Response({"status": f"Toggle command for {device} sent."})
 
 class StatusView(APIView):
     """

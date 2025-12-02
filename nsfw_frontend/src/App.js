@@ -12,6 +12,8 @@ function App() {
     danger: { volume: 0, brightness: 0, target_app: 'Microsoft Excel' },
     warning_threshold: 100,
     danger_threshold: 50,
+    led_alerts_enabled: true,
+    buzzer_alerts_enabled: true,
   });
 
   // New state to hold the currently active (saved) configuration
@@ -21,21 +23,26 @@ function App() {
     danger: { volume: 0, brightness: 0, target_app: 'Microsoft Excel' },
     warning_threshold: 100,
     danger_threshold: 50,
+    led_alerts_enabled: true,
+    buzzer_alerts_enabled: true,
   });
 
   const [currentDistance, setCurrentDistance] = useState('N/A');
   const [appList, setAppList] = useState([]);
 
-  // On component mount, fetch status periodically
-  useEffect(() => {
-    // Fetch initial settings from backend
+  const fetchAndUpdateSettings = () => {
     fetch(`${API_URL}/settings/`)
       .then(res => res.json())
       .then(data => {
-        setSettings(prev => ({ ...prev, ...data })); // Set the form state
-        setActiveConfig(prev => ({ ...prev, ...data })); // Also set the active config state
+        setSettings(prev => ({ ...prev, ...data }));
+        setActiveConfig(prev => ({ ...prev, ...data }));
       })
       .catch(err => console.error("Failed to fetch settings:", err));
+  };
+
+  // On component mount, fetch status periodically
+  useEffect(() => {
+    fetchAndUpdateSettings(); // Fetch initial settings
 
     // Fetch application list
     fetch(`${API_URL}/applications/`)
@@ -45,16 +52,28 @@ function App() {
       })
       .catch(err => console.error("Failed to fetch app list:", err));
 
-    const interval = setInterval(() => {
+    const distanceInterval = setInterval(() => {
       fetch(`${API_URL}/status/`)
         .then(res => res.json())
         .then(data => setCurrentDistance(data.distance))
         .catch(err => console.error("Failed to fetch status:", err));
     }, 1000);
+    
+    // A smarter way to sync: re-fetch settings when the user focuses on the window.
+    // This avoids overwriting their input while they are typing.
+    const handleFocus = () => {
+      console.log("Window focused, re-syncing settings...");
+      fetchAndUpdateSettings();
+    };
+
+    window.addEventListener('focus', handleFocus);
 
     // Cleanup interval on unmount
-    return () => clearInterval(interval);
-  }, []);
+    return () => {
+      clearInterval(distanceInterval);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, []); // The empty dependency array ensures this runs only once on mount.
 
   const handleInputChange = (e) => {
     const { name, value, dataset } = e.target;
@@ -89,7 +108,10 @@ function App() {
   const toggleHardware = (device) => {
     fetch(`${API_URL}/hardware/${device}/`, { method: 'POST' })
       .then(res => res.json())
-       .then(data => alert(`${data.device.toUpperCase()} is now ${data.status}`))
+       .then(data => {
+         console.log(data.status);
+         fetchAndUpdateSettings(); // Re-fetch settings to sync UI after toggle
+       })
       .catch(err => console.error(`Failed to toggle ${device}:`, err));
   };
 
@@ -118,7 +140,13 @@ function App() {
           className="asu-logo"
         />
         <div className="config-status-bar">
-          <strong>Active Config ➔</strong> 
+          <strong>Active Config ➔</strong>
+          <span className={`status-indicator ${activeConfig.led_alerts_enabled ? 'enabled' : 'disabled'}`}>
+            💡 LED: {activeConfig.led_alerts_enabled ? 'ON' : 'OFF'}
+          </span>
+          <span className={`status-indicator ${activeConfig.buzzer_alerts_enabled ? 'enabled' : 'disabled'}`}>
+            🔊 Buzzer: {activeConfig.buzzer_alerts_enabled ? 'ON' : 'OFF'}
+          </span>
           <span>✅ Safe: &gt; {activeConfig.warning_threshold}cm (Vol: {activeConfig.safe.volume}, Bright: {activeConfig.safe.brightness})</span>
           <span>⚠️ Warning: &lt; {activeConfig.warning_threshold}cm (Vol: {activeConfig.warning.volume}, Bright: {activeConfig.warning.brightness})</span>
           <span>🚨 Danger: &lt; {activeConfig.danger_threshold}cm (Vol: {activeConfig.danger.volume}, Bright: {activeConfig.danger.brightness}, App: {activeConfig.danger.target_app})</span>
@@ -192,8 +220,8 @@ function App() {
           <div className="panel">
             <h2>Hardware Control</h2>
             <div className="hardware-controls">
-              <button onClick={() => toggleHardware('led')} className="secondary">Toggle LED</button>
-              <button onClick={() => toggleHardware('buzzer')} className="secondary">Toggle Buzzer</button>
+              <button onClick={() => toggleHardware('led')} className={`secondary ${activeConfig.led_alerts_enabled ? 'active' : ''}`}>Toggle LED ({activeConfig.led_alerts_enabled ? 'ON' : 'OFF'})</button>
+              <button onClick={() => toggleHardware('buzzer')} className={`secondary ${activeConfig.buzzer_alerts_enabled ? 'active' : ''}`}>Toggle Buzzer ({activeConfig.buzzer_alerts_enabled ? 'ON' : 'OFF'})</button>
             </div>
           </div>
         </div>

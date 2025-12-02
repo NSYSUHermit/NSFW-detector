@@ -85,6 +85,23 @@ body {
   white-space: nowrap; /* Prevent individual spans from breaking mid-text */
 }
 
+.status-indicator {
+  font-weight: 700; /* Make it bolder */
+  font-size: 1.1em; /* Slightly larger font */
+  padding: 4px 10px;
+  border-radius: 6px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.status-indicator.enabled {
+  background-color: #e6ffe6; /* Light green background */
+  color: #28a745; /* Dark green text */
+}
+.status-indicator.disabled {
+  background-color: #ffe6e6; /* Light red background */
+  color: #dc3545; /* Dark red text */
+}
+
 @keyframes pulse {
   0% { transform: scale(1); }
   50% { transform: scale(1.02); }
@@ -286,6 +303,11 @@ button {
   transition: all 0.2s ease; /* Smooth transitions */
   box-shadow: var(--shadow-light); /* Subtle shadow for buttons */
   letter-spacing: 0.5px;
+}
+
+button.secondary.active {
+  background-color: var(--asu-gold); /* Highlight active toggle buttons */
+  color: var(--text-primary);
 }
 
 button.primary {
