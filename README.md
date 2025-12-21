@@ -1,5 +1,7 @@
 # Dual Ultrasonic Privacy Guardian
 
+https://youtu.be/3rke0C9s1Hs?feature=shared
+
 <p align="center">
   <img src="https://brandguide.asu.edu/assets/img/asu-logos/asu_logo_maroon_rgb.png" alt="Arizona State University Logo" width="200"/>
 </p>
